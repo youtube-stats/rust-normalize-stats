@@ -1,0 +1,18 @@
+[package]
+name = "rust-normalize-stats"
+version = "0.1.0"
+authors = ["Salvador Guzman <guzmansalv@gmail.com>"]
+edition = "2018"
+
+[[bin]]
+name = "normlr"
+path = "src/main.rs"
+
+[dependencies]
+postgres = "0.15.2"
+openssl-sys = "*"
+
+[features]
+# Force openssl-sys to staticly link in the openssl library. Necessary when
+# cross compiling to x86_64-unknown-linux-musl.
+vendored = ["openssl-sys/vendored"]
