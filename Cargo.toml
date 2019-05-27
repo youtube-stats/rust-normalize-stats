@@ -9,6 +9,7 @@ name = "normlr"
 path = "src/main.rs"
 
 [dependencies]
+chrono = "0.4.6"
 postgres = "0.15.2"
 openssl-sys = "*"
 
