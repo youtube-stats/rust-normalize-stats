@@ -13,7 +13,7 @@ struct Metric {
     time: chrono::DateTime<Local>,
     id: i32,
     subs: u32,
-    views: u64,
+    views: i64,
     videos: u32
 }
 
@@ -34,7 +34,6 @@ fn get_row(conn: &Connection) -> Option<Metric> {
     let subs: u32 = subs as u32;
 
     let views: i64 = row.get(3);
-    let views: u64 = views as u64;
 
     let videos: i32 = row.get(4);
     let videos: u32 = videos as u32;
@@ -52,7 +51,7 @@ fn delete_row(conn: &Connection, row: &Metric) {
     println!("Deleting row {}", row.string());
     let query: &'static str = DELETE;
 
-    conn.execute(query, &[row.time, row.id, row.subs, row.views, row.videos]).unwrap();
+    conn.execute(query, &[&row.time, &row.id, &row.subs, &row.views, &row.videos]).unwrap();
 }
 
 impl Metric {
@@ -85,7 +84,7 @@ mod check {
         subs != *subs_incumbent
     }
 
-    pub fn views(conn: &Connection, id: &i32, views_incumbent: &u64) -> bool {
+    pub fn views(conn: &Connection, id: &i32, views_incumbent: &i64) -> bool {
         let query: &'static str = VIEWS_SELECT;
 
         let rows: Rows = conn.query(query, &[id]).unwrap();
@@ -96,7 +95,6 @@ mod check {
 
         let row: Row = row_option.unwrap();
         let views: i64 = row.get(0);
-        let views: u64 = views as u64;
 
         views != *views_incumbent
     }
@@ -128,7 +126,7 @@ mod insert {
     const VIDEOS_INSERT: &'static str = "INSERT INTO youtube.stats.metric_videos (time, channel_id, videos) VALUES ($1, $2, $3);";
 
     pub fn subs_insert(conn: &Connection, time: &chrono::DateTime<Local>, id: &i32, subs: &u32) {
-        println!("Inserting {} into subs table", row.string());
+        println!("Inserting ({},{}) into subs table", id, subs);
         let query: &'static str = SUBS_INSERT;
 
         let output: u64 = conn.execute(query, &[time, id, subs]).unwrap();
@@ -137,8 +135,8 @@ mod insert {
         }
     }
 
-    pub fn views_insert(conn: &Connection, time: &chrono::DateTime<Local>, id: &i32, views: &u64) {
-        println!("Inserting {} into views table", row.string());
+    pub fn views_insert(conn: &Connection, time: &chrono::DateTime<Local>, id: &i32, views: &i64) {
+        println!("Inserting ({},{}) into views table", id, views);
         let query: &'static str = VIEWS_INSERT;
 
         let output: u64 = conn.execute(query, &[time, id, views]).unwrap();
@@ -148,7 +146,7 @@ mod insert {
     }
 
     pub fn videos_insert(conn: &Connection, time: &chrono::DateTime<Local>, id: &i32, videos: &u32) {
-        println!("Inserting {} into videos table", row.string());
+        println!("Inserting ({},{}) into videos table", id, videos);
         let query: &'static str = VIDEOS_INSERT;
 
         let output: u64 = conn.execute(query, &[time, id, videos]).unwrap();
