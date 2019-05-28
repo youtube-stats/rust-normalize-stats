@@ -64,7 +64,7 @@ mod check {
     pub fn subs(conn: &Connection, id: &i32, subs_incumbent: &u32) -> bool {
         let query: &'static str = SUBS_SELECT;
 
-        let rows: Rows = conn.query(query, &[&id]).unwrap();
+        let rows: Rows = conn.query(query, &[id]).unwrap();
         let row_option: Option<Row> = rows.iter().last();
         if row_option.is_none() {
             return true;
@@ -80,7 +80,7 @@ mod check {
     pub fn views(conn: &Connection, id: &i32, views_incumbent: &u64) -> bool {
         let query: &'static str = VIEWS_SELECT;
 
-        let rows: Rows = conn.query(query, &[&id]).unwrap();
+        let rows: Rows = conn.query(query, &[id]).unwrap();
         let row_option: Option<Row> = rows.iter().last();
         if row_option.is_none() {
             return true;
@@ -96,7 +96,7 @@ mod check {
 pub fn videos(conn: &Connection, id: &i32, videos_incumbent: &u32) -> bool {
         let query: &'static str = VIDEOS_SELECT;
 
-        let rows: Rows = conn.query(query, &[&id]).unwrap();
+        let rows: Rows = conn.query(query, &[id]).unwrap();
         let row_option: Option<Row> = rows.iter().last();
         if row_option.is_none() {
             return true;
@@ -108,6 +108,10 @@ pub fn videos(conn: &Connection, id: &i32, videos_incumbent: &u32) -> bool {
 
         videos != *videos_incumbent
     }
+}
+
+mod insert {
+
 }
 
 fn main() {
