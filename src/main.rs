@@ -51,7 +51,7 @@ impl Metric {
 }
 
 fn main() {
-    println!("Hello, world!");
+    println!("init!");
 
     let params: &'static str = POSTGRESQL_URL;
     let tls: TlsMode = TlsMode::None;
@@ -67,4 +67,6 @@ fn main() {
 
         println!("Retrieved row {}", row.string());
     }
+
+    println!("done");
 }
