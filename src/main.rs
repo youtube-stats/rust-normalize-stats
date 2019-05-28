@@ -3,6 +3,7 @@ extern crate postgres;
 
 const POSTGRESQL_URL: &'static str = "postgresql://admin@localhost:5432/youtube";
 const QUERY: &'static str = "SELECT time, channel_id, subs::int, views::bigint, videos::int FROM youtube.stats.metrics ORDER BY time ASC limit 1";
+const DELETE: &'static str = "DELETE FROM youtube.stats.metrics WHERE time = $1 AND channel_id = $2 AND subs = $3 AND views = $4 AND videos = $5";
 
 use postgres::{TlsMode,Connection};
 use chrono::Local;
@@ -45,6 +46,13 @@ fn get_row(conn: &Connection) -> Option<Metric> {
         views,
         videos
     })
+}
+
+fn delete_row(conn: &Connection, row: &Metric) {
+    println!("Deleting row {}", row.string());
+    let query: &'static str = DELETE;
+
+    conn.execute(query, &[row.time, row.id, row.subs, row.views, row.videos]).unwrap();
 }
 
 impl Metric {
@@ -111,7 +119,43 @@ pub fn videos(conn: &Connection, id: &i32, videos_incumbent: &u32) -> bool {
 }
 
 mod insert {
+    use postgres::Connection;
+    use postgres::rows::{Row,Rows};
+    use chrono::Local;
 
+    const SUBS_INSERT: &'static str = "INSERT INTO youtube.stats.metric_subs (time, channel_id, subs) VALUES ($1, $2, $3);";
+    const VIEWS_INSERT: &'static str = "INSERT INTO youtube.stats.metric_views (time, channel_id, views) VALUES ($1, $2, $3);";
+    const VIDEOS_INSERT: &'static str = "INSERT INTO youtube.stats.metric_videos (time, channel_id, videos) VALUES ($1, $2, $3);";
+
+    pub fn subs_insert(conn: &Connection, time: &chrono::DateTime<Local>, id: &i32, subs: &u32) {
+        println!("Inserting {} into subs table", row.string());
+        let query: &'static str = SUBS_INSERT;
+
+        let output: u64 = conn.execute(query, &[time, id, subs]).unwrap();
+        if output != 1 {
+            eprintln!("Could not insert row {} {} {}", time, id, subs);
+        }
+    }
+
+    pub fn views_insert(conn: &Connection, time: &chrono::DateTime<Local>, id: &i32, views: &u64) {
+        println!("Inserting {} into views table", row.string());
+        let query: &'static str = VIEWS_INSERT;
+
+        let output: u64 = conn.execute(query, &[time, id, views]).unwrap();
+        if output != 1 {
+            eprintln!("Could not insert row {} {} {}", time, id, views);
+        }
+    }
+
+    pub fn videos_insert(conn: &Connection, time: &chrono::DateTime<Local>, id: &i32, videos: &u32) {
+        println!("Inserting {} into videos table", row.string());
+        let query: &'static str = VIDEOS_INSERT;
+
+        let output: u64 = conn.execute(query, &[time, id, videos]).unwrap();
+        if output != 1 {
+            eprintln!("Could not insert row {} {} {}", time, id, videos);
+        }
+    }
 }
 
 fn main() {
@@ -136,9 +180,27 @@ fn main() {
         let row: Metric = row_option.unwrap();
         println!("Retrieved row {}", row.string());
 
-        println!("Subs {}", check::subs(&conn, &row.id, &row.subs));
-        println!("Views {}", check::views(&conn, &row.id, &row.views));
-        println!("Videos {}", check::videos(&conn, &row.id, &row.videos));
+        let subs_insert_pred: bool = check::subs(&conn, &row.id, &row.subs);
+        let views_insert_pred: bool = check::views(&conn, &row.id, &row.views);
+        let videos_insert_pred: bool = check::videos(&conn, &row.id, &row.videos);
+
+        println!("Subs {}", subs_insert_pred);
+        println!("Views {}", views_insert_pred);
+        println!("Videos {}", videos_insert_pred);
+
+        if subs_insert_pred {
+            insert::subs_insert(&conn, &row.time, &row.id, &row.subs)
+        }
+
+        if views_insert_pred {
+            insert::views_insert(&conn, &row.time, &row.id, &row.views)
+        }
+
+        if videos_insert_pred {
+            insert::videos_insert(&conn, &row.time, &row.id, &row.videos)
+        }
+
+        delete_row(&conn, &row);
     }
 
     println!("done");
