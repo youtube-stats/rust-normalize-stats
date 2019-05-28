@@ -60,9 +60,9 @@ mod check {
     use postgres::Connection;
     use postgres::rows::{Row,Rows};
 
-    const SUBS_SELECT: &'static str = "SELECT subs FROM youtube.stats.metric_subs WHERE channel_id = $1 ORDER BY time ASC LIMIT 1";
-    const VIEWS_SELECT: &'static str = "SELECT views FROM youtube.stats.metric_views WHERE channel_id = $1 ORDER BY time ASC LIMIT 1";
-    const VIDEOS_SELECT: &'static str = "SELECT videos FROM youtube.stats.metric_videos WHERE channel_id = $1 ORDER BY time ASC LIMIT 1";
+    const SUBS_SELECT: &'static str = "SELECT subs FROM youtube.stats.metric_subs WHERE channel_id = $1 ORDER BY time DESC LIMIT 1";
+    const VIEWS_SELECT: &'static str = "SELECT views FROM youtube.stats.metric_views WHERE channel_id = $1 ORDER BY time DESC LIMIT 1";
+    const VIDEOS_SELECT: &'static str = "SELECT videos FROM youtube.stats.metric_videos WHERE channel_id = $1 ORDER BY time DESC LIMIT 1";
 
     pub fn subs(conn: &Connection, id: &i32, subs_incumbent: &i32) -> bool {
         let query: &'static str = SUBS_SELECT;
