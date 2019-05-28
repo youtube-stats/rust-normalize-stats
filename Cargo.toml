@@ -10,7 +10,7 @@ path = "src/main.rs"
 
 [dependencies]
 chrono = "0.4.6"
-postgres = "0.15.2"
+postgres = { version = "0.15.2", features = ["with-chrono"] }
 openssl-sys = "*"
 
 [features]
