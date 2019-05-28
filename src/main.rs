@@ -16,11 +16,15 @@ struct Metric {
     videos: u32
 }
 
-fn get_row(conn: &Connection) -> Metric {
+fn get_row(conn: &Connection) -> Option<Metric> {
     let query: &'static str = QUERY;
     let rows: Rows = conn.query(query, &[]).unwrap();
-    let row: Row = rows.iter().last().unwrap();
+    let row_option: Option<Row> = rows.iter().last();
+    if row_option.is_none() {
+        return None;
+    }
 
+    let row: Row = row_option.unwrap();
     let time: chrono::DateTime<Local> = row.get(0);
 
     let id: i32 = row.get(1);
@@ -35,13 +39,13 @@ fn get_row(conn: &Connection) -> Metric {
     let videos: i32 = row.get(4);
     let videos: u32 = videos as u32;
 
-    Metric {
+    Some(Metric {
         time,
         id,
         subs,
         views,
         videos
-    }
+    })
 }
 
 impl Metric {
@@ -63,9 +67,16 @@ fn main() {
         println!("Inserted {} rows", count);
         count += 1;
 
-        let row: Metric = get_row(&conn);
+        let row_option: Option<Metric> = get_row(&conn);
+        if row_option.is_none() {
+            eprintln!("No rows");
+            break;
+        }
 
+        let row: Metrics = row_option.unwrap();
         println!("Retrieved row {}", row.string());
+
+
     }
 
     println!("done");
